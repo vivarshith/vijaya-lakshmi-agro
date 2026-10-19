@@ -4,264 +4,47 @@
 {% block title %}WhatsApp Checkout | Vijaya Lakshmi Agro Agencies{% endblock %}
 
 {% block content %}
-
 <section class="page-banner">
     <div class="wrap">
         <span class="eyebrow">ONE LAST STEP</span>
         <h1>Send your order enquiry</h1>
-        <p>
-            Your order details will be prepared for WhatsApp.
-            No online payment is collected on this website.
-        </p>
+        <p>Your order details will be prepared for WhatsApp. No online payment is collected on this website.</p>
     </div>
 </section>
 
 <section class="wrap checkout-layout">
-
     <form id="checkout-form" class="checkout-form">
+        {% csrf_token %}
         <h2>Customer details</h2>
 
         <label for="customer-name">Full name *</label>
-        <input
-            id="customer-name"
-            name="name"
-            required
-            maxlength="100"
-            autocomplete="name"
-        >
+        <input id="customer-name" name="name" required maxlength="100" autocomplete="name">
 
         <label for="customer-phone">Phone number *</label>
-        <input
-            id="customer-phone"
-            name="phone"
-            type="tel"
-            required
-            maxlength="30"
-            autocomplete="tel"
-        >
+        <input id="customer-phone" name="phone" type="tel" required maxlength="30" autocomplete="tel">
 
         <label for="customer-address">Delivery address / village *</label>
-        <textarea
-            id="customer-address"
-            name="address"
-            required
-            maxlength="500"
-            rows="4"
-            autocomplete="street-address"
-        ></textarea>
+        <textarea id="customer-address" name="address" required maxlength="500" rows="4" autocomplete="street-address"></textarea>
 
         <label for="customer-notes">Additional notes (optional)</label>
-        <textarea
-            id="customer-notes"
-            name="notes"
-            rows="2"
-            maxlength="300"
-        ></textarea>
+        <textarea id="customer-notes" name="notes" rows="2" maxlength="300"></textarea>
 
-        <button
-            id="checkout-submit"
-            class="btn btn-primary btn-large full-width"
-            type="submit"
-        >
+        <button id="checkout-submit" class="btn btn-primary btn-large full-width" type="submit">
             Send order to WhatsApp ↗
         </button>
 
-        <p
-            id="checkout-error"
-            class="error-message"
-            role="alert"
-        ></p>
-
-        <p class="fine-print">
-            WhatsApp will open with your order details.
-            Review the message and press Send there to contact the shop.
-        </p>
+        <p id="checkout-error" class="error-message" role="alert"></p>
+        <p class="fine-print">WhatsApp will open with your order details. Review the message and press Send there to contact the shop.</p>
     </form>
 
     <aside class="cart-summary">
         <h2>Order summary</h2>
-
         <div id="checkout-summary"></div>
-
         <div class="summary-line total-line">
             <span>Estimated subtotal</span>
             <strong id="checkout-total">₹0.00</strong>
         </div>
-
         <p>Delivery fee and final price are confirmed by the owner.</p>
     </aside>
-
 </section>
-
-<script>
-(function () {
-    const form = document.getElementById("checkout-form");
-    const errorBox = document.getElementById("checkout-error");
-    const summaryBox = document.getElementById("checkout-summary");
-    const totalBox = document.getElementById("checkout-total");
-    const submitButton = document.getElementById("checkout-submit");
-
-    // Read the existing cart saved by the website.
-    function getCart() {
-        const possibleKeys = ["cart", "vla_cart", "agro_cart"];
-
-        for (const key of possibleKeys) {
-            try {
-                const value = localStorage.getItem(key);
-                if (!value) continue;
-
-                const parsed = JSON.parse(value);
-
-                if (Array.isArray(parsed)) return parsed;
-
-                if (parsed && typeof parsed === "object") {
-                    if (Array.isArray(parsed.items)) return parsed.items;
-                    return Object.entries(parsed).map(([id, item]) => ({
-                        id: item.id ?? id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity ?? item.qty ?? 1,
-                        unit: item.unit
-                    }));
-                }
-            } catch (error) {
-                console.warn("Could not read cart key:", key);
-            }
-        }
-
-        return [];
-    }
-
-    function getItemId(item) {
-        return item.id ?? item.product_id ?? item.productId;
-    }
-
-    function getItemQuantity(item) {
-        return Number(item.quantity ?? item.qty ?? 1);
-    }
-
-    function renderSummary() {
-        const cart = getCart();
-        summaryBox.replaceChildren();
-
-        let subtotal = 0;
-
-        if (!cart.length) {
-            summaryBox.textContent = "Your cart appears to be empty.";
-            totalBox.textContent = "₹0.00";
-            return;
-        }
-
-        cart.forEach(function (item) {
-            const quantity = getItemQuantity(item);
-            const price = Number(item.price ?? 0);
-            const lineTotal = price * quantity;
-
-            subtotal += lineTotal;
-
-            const line = document.createElement("p");
-            line.textContent =
-                `${item.name ?? "Product"} × ${quantity}` +
-                ` — ₹${lineTotal.toFixed(2)}`;
-
-            summaryBox.appendChild(line);
-        });
-
-        totalBox.textContent = `₹${subtotal.toFixed(2)}`;
-    }
-
-    renderSummary();
-
-    form.addEventListener("submit", async function (event) {
-        event.preventDefault();
-
-        errorBox.textContent = "";
-
-        const cart = getCart();
-
-        if (!cart.length) {
-            errorBox.textContent =
-                "Your cart is empty. Please add a product before checkout.";
-            return;
-        }
-
-        const customer = {
-            name: document.getElementById("customer-name").value.trim(),
-            phone: document.getElementById("customer-phone").value.trim(),
-            address: document.getElementById("customer-address").value.trim(),
-            notes: document.getElementById("customer-notes").value.trim()
-        };
-
-        if (!customer.name || !customer.phone || !customer.address) {
-            errorBox.textContent =
-                "Please enter your name, phone number and delivery address.";
-            return;
-        }
-
-        const items = cart.map(function (item) {
-            return {
-                id: getItemId(item),
-                quantity: getItemQuantity(item)
-            };
-        });
-
-        const csrfInput = document.querySelector(
-            "[name=csrfmiddlewaretoken]"
-        );
-
-        const csrfCookie = document.cookie
-            .split("; ")
-            .find(row => row.startsWith("csrftoken="));
-
-        const csrfToken = csrfInput
-            ? csrfInput.value
-            : csrfCookie
-                ? decodeURIComponent(csrfCookie.split("=")[1])
-                : "";
-
-        submitButton.disabled = true;
-        submitButton.textContent = "Preparing your WhatsApp message…";
-
-        try {
-            const response = await fetch(
-                "{% url 'checkout' %}",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({
-                        customer: customer,
-                        items: items
-                    })
-                }
-            );
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    result.error || "Unable to prepare your order."
-                );
-            }
-
-            if (!result.whatsapp_url) {
-                throw new Error("WhatsApp link was not returned.");
-            }
-
-            window.location.href = result.whatsapp_url;
-
-        } catch (error) {
-            errorBox.textContent =
-                error.message ||
-                "Something went wrong. Please try again.";
-
-            submitButton.disabled = false;
-            submitButton.textContent = "Send order to WhatsApp ↗";
-        }
-    });
-})();
-</script>
-
 {% endblock %}
