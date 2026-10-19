@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: vijaya-lakshmi-agro
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vijaya-lakshmi-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+databases:
+  - name: vijaya-lakshmi-db
+    databaseName: vijaya_lakshmi
+    user: vijaya_lakshmi

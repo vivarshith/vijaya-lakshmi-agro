@@ -1,0 +1,10 @@
+{% extends "store/base.html" %}
+{% block title %}Products | Vijaya Lakshmi Agro Agencies{% endblock %}
+{% block content %}
+<section class="page-banner"><div class="wrap"><span class="eyebrow">OUR AGRICULTURAL RANGE</span><h1>{% if current_category %}{{ current_category.name }}{% else %}Products for every growing season{% endif %}</h1><p>Explore our range of farming essentials. Availability is confirmed by the shop.</p></div></section>
+<section class="wrap listing-layout">
+  <aside class="filters"><h3>Categories</h3><a class="{% if not selected_category %}active{% endif %}" href="{% url 'store:product_list' %}">All products</a>{% for c in categories %}<a class="{% if selected_category == c.category_type %}active{% endif %}" href="{% url 'store:product_list' %}?category={{ c.category_type }}">{{ c.name }}</a>{% endfor %}</aside>
+  <div class="listing-content"><form class="search-form" method="get"><input type="search" name="q" value="{{ query }}" placeholder="Search products or brands..." aria-label="Search products"><button class="btn btn-primary" type="submit">Search</button></form>
+  {% if products %}<div class="product-grid">{% for product in products %}{% include "store/product_card.html" %}{% endfor %}</div>{% else %}<div class="empty-state"><span>⌕</span><h3>No products found</h3><p>Try another search or check back soon.</p></div>{% endif %}</div>
+</section>
+{% endblock %}

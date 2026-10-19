@@ -1,0 +1,8 @@
+{% extends "store/base.html" %}
+{% block title %}{{ product.name }} | Vijaya Lakshmi Agro Agencies{% endblock %}
+{% block content %}
+<section class="wrap detail-layout">
+  <div class="detail-image">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<div class="image-placeholder"><span>❋</span><small>Product photo coming soon</small></div>{% endif %}</div>
+  <div class="detail-info"><a class="back-link" href="{% url 'store:product_list' %}">← Back to products</a><span class="product-category">{{ product.category.name }}</span><h1>{{ product.name }}</h1>{% if product.brand %}<p class="product-brand">{{ product.brand }}</p>{% endif %}<div class="detail-price">₹{{ product.price|floatformat:2 }} <small>/ {{ product.unit }}</small></div><p class="detail-description">{{ product.description|linebreaksbr }}</p><p class="stock-status">{% if product.stock_quantity > 0 %}Availability to be confirmed · Listed stock: {{ product.stock_quantity }}{% else %}Currently unavailable{% endif %}</p><div class="quantity-row"><label for="detail-qty">Quantity</label><input id="detail-qty" type="number" min="1" max="999" value="1"></div><button class="btn btn-primary btn-large" data-add-cart data-id="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-unit="{{ product.unit }}" {% if product.stock_quantity < 1 %}disabled{% endif %}>Add to cart</button><p class="fine-print">Estimated price only. Final availability and delivery charges are confirmed by the shop.</p></div>
+</section>
+{% endblock %}
