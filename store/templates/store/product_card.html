@@ -4,173 +4,90 @@
     {% if product.image %}
       <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
     {% else %}
-      <div class="image-placeholder">
-        <span>❋</span>
-        <small>Product photo coming soon</small>
-      </div>
+      <div class="image-placeholder"><span>❋</span><small>Product photo coming soon</small></div>
     {% endif %}
-
-    {% if product.featured %}
-      <span class="product-tag">Featured</span>
-    {% endif %}
+    {% if product.featured %}<span class="product-tag">Featured</span>{% endif %}
   </a>
 
   <div class="product-info">
     <span class="product-category">{{ product.category.name }}</span>
-
-    <h3>
-      <a href="{% url 'store:product_detail' product.slug %}">
-        {{ product.name }}
-      </a>
-    </h3>
-
-    {% if product.brand %}
-      <p class="product-brand">{{ product.brand }}</p>
-    {% endif %}
+    <h3><a href="{% url 'store:product_detail' product.slug %}">{{ product.name }}</a></h3>
+    {% if product.brand %}<p class="product-brand">{{ product.brand }}</p>{% endif %}
 
     <div class="product-bottom">
-      <strong>
-        ₹{{ product.price|floatformat:2 }}
-        <small>/ {{ product.unit }}</small>
-      </strong>
-
+      <strong>₹{{ product.price|floatformat:2 }} <small>/ {{ product.unit }}</small></strong>
       <button
         type="button"
         class="add-btn"
         data-add-cart
         data-id="{{ product.id }}"
         data-name="{{ product.name }}"
-        data-price="{{ product.price }}"
-        data-unit="{{ product.unit }}"
         {% if product.stock_quantity < 1 %}disabled{% endif %}
         aria-label="Add {{ product.name }} to cart"
         title="Add to cart"
       >+</button>
     </div>
-
-    {% if product.stock_quantity < 1 %}
-      <small class="out-stock">Currently unavailable</small>
-    {% endif %}
+    {% if product.stock_quantity < 1 %}<small class="out-stock">Currently unavailable</small>{% endif %}
   </div>
 </article>
 
 <style>
 .product-card .add-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  border: 0;
-  border-radius: 10px;
-  background: #204c30;
-  color: #fff9ed;
-  font-size: 26px;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    transform .2s ease,
-    background .2s ease,
-    box-shadow .2s ease;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; flex-shrink: 0;
+  border: 0; border-radius: 10px; background: #204c30;
+  color: #fff9ed; font-size: 26px; line-height: 1;
+  cursor: pointer; transition: transform .2s, background .2s, box-shadow .2s;
 }
-
 .product-card .add-btn:hover:not(:disabled) {
-  background: #153b25;
-  transform: translateY(-2px);
+  background: #153b25; transform: translateY(-2px);
   box-shadow: 0 5px 12px #204c3030;
 }
-
-.product-card .add-btn:active:not(:disabled) {
-  transform: scale(.9);
-}
-
-.product-card .add-btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
-
-.product-card .add-btn.is-added {
-  background: #b18b32;
-  transform: scale(1.08);
-}
-
-.product-card .add-btn.is-loading {
-  opacity: .65;
-  cursor: wait;
-}
+.product-card .add-btn:active:not(:disabled) { transform: scale(.9); }
+.product-card .add-btn:disabled { opacity: .5; cursor: not-allowed; }
+.product-card .add-btn.is-added { background: #b18b32; transform: scale(1.08); }
+.product-card .add-btn.is-loading { opacity: .65; cursor: wait; }
 
 #vla-cart-toast {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: calc(100vw - 32px);
-  padding: 14px 20px;
-  border: 1px solid #ffffff25;
-  border-radius: 13px;
-  background: #173f2b;
-  color: #fff8ed;
+  position: fixed; right: 22px; bottom: 96px; z-index: 10001;
+  display: flex; align-items: center; gap: 10px;
+  max-width: calc(100vw - 32px); padding: 14px 20px;
+  border: 1px solid #ffffff25; border-radius: 13px;
+  background: #173f2b; color: #fff8ed;
   box-shadow: 0 10px 30px #0002;
-  opacity: 0;
-  transform: translateY(14px) scale(.98);
-  pointer-events: none;
-  transition: opacity .22s ease, transform .22s ease;
+  opacity: 0; transform: translateY(14px) scale(.98);
+  pointer-events: none; transition: opacity .22s, transform .22s;
 }
-
-#vla-cart-toast.is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
+#vla-cart-toast.is-visible { opacity: 1; transform: translateY(0) scale(1); }
 #vla-cart-toast .toast-check {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #ffffff20;
-  font-weight: bold;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 25px; height: 25px; flex-shrink: 0;
+  border-radius: 50%; background: #ffffff20; font-weight: bold;
 }
-
 @media (max-width: 600px) {
-  #vla-cart-toast {
-    right: 16px;
-    bottom: 88px;
-  }
+  #vla-cart-toast { right: 16px; bottom: 94px; }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .product-card .add-btn,
-  #vla-cart-toast {
-    transition: none;
-  }
+  .product-card .add-btn, #vla-cart-toast { transition: none; }
 }
 </style>
 
 <script>
 (function () {
-  // This script is included with every product card, so initialise it once.
   if (window.vlaCartAddHandlerInstalled) return;
   window.vlaCartAddHandlerInstalled = true;
 
-  let toastTimer = null;
+  let toastTimer;
 
-  function getCsrfToken() {
-    const cookie = document.cookie
-      .split("; ")
-      .find(row => row.startsWith("csrftoken="));
-
+  function csrfToken() {
+    const cookie = document.cookie.split("; ").find(
+      row => row.startsWith("csrftoken=")
+    );
     return cookie ? decodeURIComponent(cookie.split("=")[1]) : "";
   }
 
-  function showCartToast(message, success) {
+  function showToast(message, success) {
     let toast = document.getElementById("vla-cart-toast");
-
     if (!toast) {
       toast = document.createElement("div");
       toast.id = "vla-cart-toast";
@@ -180,29 +97,29 @@
     }
 
     toast.replaceChildren();
-
-    const check = document.createElement("span");
-    check.className = "toast-check";
-    check.textContent = success ? "✓" : "!";
-
+    const mark = document.createElement("span");
+    mark.className = "toast-check";
+    mark.textContent = success ? "✓" : "!";
     const text = document.createElement("span");
     text.textContent = message;
-
-    toast.append(check, text);
+    toast.append(mark, text);
     toast.classList.add("is-visible");
 
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () {
-      toast.classList.remove("is-visible");
-    }, 2600);
+    toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2600);
   }
 
-  function updateCartCounters(count) {
+  function updateCounters(count) {
     document.querySelectorAll(
       "[data-cart-count], #cart-count-badge, .cart-count"
-    ).forEach(function (element) {
-      element.textContent = String(count);
-    });
+    ).forEach(node => { node.textContent = String(count); });
+
+    const headerCount = document.getElementById("cart-count");
+    if (headerCount) headerCount.textContent = String(count);
+
+    document.dispatchEvent(new CustomEvent("vla:cart-updated", {
+      detail: { count: count }
+    }));
   }
 
   document.addEventListener("click", async function (event) {
@@ -210,20 +127,18 @@
     if (!button) return;
 
     event.preventDefault();
-
     if (button.disabled || button.dataset.adding === "true") return;
 
     const productId = button.dataset.id;
     if (!productId) {
-      showCartToast("Product information is missing. Please refresh.", false);
+      showToast("Product information is missing. Refresh the page.", false);
       return;
     }
 
+    const originalText = button.textContent.trim() || "+";
     button.dataset.adding = "true";
     button.disabled = true;
     button.classList.add("is-loading");
-
-    const originalText = button.textContent.trim() || "+";
     button.textContent = "…";
 
     try {
@@ -233,7 +148,7 @@
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "X-CSRFToken": getCsrfToken()
+          "X-CSRFToken": csrfToken()
         },
         body: JSON.stringify({
           product_id: productId,
@@ -243,55 +158,39 @@
       });
 
       if (response.status === 401) {
-        window.location.href =
-          "{% url 'store:login' %}?next=" +
+        window.location.href = "{% url 'store:login' %}?next=" +
           encodeURIComponent(window.location.pathname);
         return;
       }
 
-      const data = await response.json().catch(function () {
-        return {};
-      });
-
+      const data = await response.json().catch(() => ({}));
       if (!response.ok || data.ok === false) {
         throw new Error(data.error || "Unable to add this product.");
       }
 
-      updateCartCounters(data.count);
-
+      updateCounters(data.count);
       button.textContent = "✓";
       button.classList.remove("is-loading");
       button.classList.add("is-added");
 
-      showCartToast(
-        (button.dataset.name || "Product") + " added to your cart",
-        true
-      );
+      showToast((button.dataset.name || "Product") + " added to your cart", true);
 
-      // Briefly animate the product card.
       const card = button.closest(".product-card");
-      if (card) {
+      if (card && card.animate) {
         card.animate(
-          [
-            { transform: "scale(1)" },
-            { transform: "scale(1.012)" },
-            { transform: "scale(1)" }
-          ],
+          [{ transform: "scale(1)" }, { transform: "scale(1.012)" }, { transform: "scale(1)" }],
           { duration: 260, easing: "ease-out" }
         );
       }
 
-      setTimeout(function () {
+      setTimeout(() => {
         button.textContent = originalText;
         button.classList.remove("is-added");
       }, 1000);
 
     } catch (error) {
       button.textContent = originalText;
-      showCartToast(
-        error.message || "Could not add this product. Please try again.",
-        false
-      );
+      showToast(error.message || "Could not add this product.", false);
     } finally {
       button.classList.remove("is-loading");
       button.disabled = false;
