@@ -13,17 +13,24 @@
 
 <section class="wrap cart-page cart-page-enhanced">
   <div class="cart-main">
-    <div id="cart-status" class="cart-status" role="status" aria-live="polite">
-      Loading your cart…
-    </div>
+    <p id="cart-status" class="cart-status" role="status" aria-live="polite">Loading your cart…</p>
     <div id="cart-items" class="cart-items"></div>
   </div>
 
   <aside class="cart-summary">
     <h2>Order estimate</h2>
-    <div class="summary-line"><span>Items</span><strong id="cart-count">0</strong></div>
-    <div class="summary-line"><span>Subtotal</span><strong id="cart-subtotal">₹0.00</strong></div>
-    <div class="summary-line"><span>Delivery</span><span>To be confirmed</span></div>
+    <div class="summary-line">
+      <span>Items</span>
+      <strong id="cart-page-count">0</strong>
+    </div>
+    <div class="summary-line">
+      <span>Subtotal</span>
+      <strong id="cart-subtotal">₹0.00</strong>
+    </div>
+    <div class="summary-line">
+      <span>Delivery</span>
+      <span>To be confirmed</span>
+    </div>
     <p>Final availability, delivery charges and payment are confirmed by the shop.</p>
     <a class="btn btn-primary btn-large full-width" href="{% url 'store:checkout' %}">Proceed to checkout</a>
     <a class="text-link" href="{% url 'store:product_list' %}">← Continue shopping</a>
@@ -31,7 +38,10 @@
 </section>
 
 <div id="cart-mobile-checkout" class="cart-mobile-checkout" hidden>
-  <div><span>Estimated total</span><strong id="cart-mobile-total">₹0.00</strong></div>
+  <div>
+    <span>Estimated total</span>
+    <strong id="cart-mobile-total">₹0.00</strong>
+  </div>
   <a class="btn btn-primary" href="{% url 'store:checkout' %}">Checkout →</a>
 </div>
 
@@ -44,7 +54,7 @@
   gap: 28px;
   align-items: start;
   padding-top: 28px;
-  padding-bottom: 100px;
+  padding-bottom: 110px;
 }
 .cart-main { min-width: 0; }
 .cart-status { margin-bottom: 16px; color: #52675a; }
@@ -53,39 +63,48 @@
 
 .cart-row {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) auto;
+  grid-template-columns: 100px minmax(0, 1fr) auto;
   gap: 16px;
   align-items: center;
-  padding: 16px;
+  padding: 18px;
   background: #fbf0df;
   border: 1px solid #e5d2b5;
   border-radius: 16px;
-  animation: cart-appear .24s ease both;
-}
-@keyframes cart-appear {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 .cart-row-image {
-  width: 88px;
-  height: 88px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   border-radius: 10px;
-  background: #fff9ef;
+  background: #f2e7d4;
+}
+.cart-image-placeholder {
+  display: flex;
+  width: 100px;
+  height: 100px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #e9efdf;
+  color: #204c30;
+  font-size: 28px;
 }
 .cart-row h3 { margin: 0 0 5px; font-size: 1.05rem; color: #173f2b; }
 .cart-row p { margin: 4px 0; color: #68766c; font-size: .92rem; }
 .cart-row-price { font-weight: 700; color: #173f2b; white-space: nowrap; }
-.cart-row-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.cart-row-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
 .cart-qty {
-  width: 72px; padding: 8px; border: 1px solid #d9c4a4;
+  width: 72px; padding: 9px; border: 1px solid #d9c4a4;
   border-radius: 8px; background: #fff8ed; color: #173f2b;
 }
-.cart-action { border: 0; background: transparent; color: #8c3528; cursor: pointer; padding: 7px; font-weight: 600; }
+.cart-action {
+  border: 0; background: transparent; color: #8c3528;
+  cursor: pointer; padding: 8px; font-weight: 600;
+}
 .cart-action:disabled { opacity: .5; cursor: wait; }
-
+.cart-remove { font-size: 20px; }
 .cart-summary {
-  position: sticky; top: 20px; padding: 22px;
+  position: sticky; top: 20px; padding: 24px;
   border: 1px solid #e5d2b5; border-radius: 16px; background: #fbf0df;
 }
 .cart-summary h2 { margin-top: 0; color: #173f2b; }
@@ -96,16 +115,15 @@
 .cart-summary p { color: #68766c; font-size: .9rem; line-height: 1.5; }
 .full-width { display: flex; width: 100%; justify-content: center; margin: 18px 0 12px; }
 .cart-summary .text-link { display: inline-block; margin-top: 8px; }
-
 .cart-empty {
   padding: 32px; border: 1px dashed #d9c4a4;
   border-radius: 16px; background: #fbf0df; text-align: center;
 }
 .cart-empty h2 { color: #173f2b; }
-.cart-mobile-checkout { display: none; }
 
+.cart-mobile-checkout { display: none; }
 .cart-toast {
-  position: fixed; z-index: 10002; right: 22px; bottom: 22px;
+  position: fixed; z-index: 10002; right: 22px; bottom: 95px;
   max-width: min(380px, calc(100vw - 32px)); padding: 13px 18px;
   background: #173f2b; color: #fff8ed; border-radius: 12px;
   box-shadow: 0 10px 30px #0002; opacity: 0; transform: translateY(12px);
@@ -114,9 +132,9 @@
 .cart-toast.show { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 760px) {
-  .cart-page-enhanced { grid-template-columns: 1fr; gap: 18px; padding-bottom: 120px; }
-  .cart-row { grid-template-columns: 68px minmax(0, 1fr); gap: 12px; padding: 12px; }
-  .cart-row-image { width: 68px; height: 68px; }
+  .cart-page-enhanced { grid-template-columns: 1fr; gap: 18px; padding-bottom: 130px; }
+  .cart-row { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 12px; }
+  .cart-row-image, .cart-image-placeholder { width: 72px; height: 72px; }
   .cart-row-price { grid-column: 2; }
   .cart-summary { position: static; }
 
@@ -130,25 +148,27 @@
   .cart-mobile-checkout div { display: grid; gap: 3px; }
   .cart-mobile-checkout span { font-size: .8rem; color: #68766c; }
   .cart-mobile-checkout strong { color: #173f2b; font-size: 1.05rem; }
-  .cart-toast { right: 16px; bottom: 90px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cart-row, .cart-toast { animation: none; transition: none; }
+  .cart-toast { transition: none; }
 }
 </style>
 
 <script>
 (function () {
-  const apiUrl = "{% url 'store:cart_api' %}";
-  const updateUrl = "{% url 'store:cart_api_update' %}";
+  const cartApi = "{% url 'store:cart_api' %}";
+  const updateApi = "{% url 'store:cart_api_update' %}";
   const loginUrl = "{% url 'store:login' %}";
+
   const itemsNode = document.getElementById("cart-items");
   const statusNode = document.getElementById("cart-status");
+  const pageCount = document.getElementById("cart-page-count");
   const subtotalNode = document.getElementById("cart-subtotal");
-  const countNode = document.getElementById("cart-count");
-  const mobileTotalNode = document.getElementById("cart-mobile-total");
+  const mobileTotal = document.getElementById("cart-mobile-total");
   const mobileBar = document.getElementById("cart-mobile-checkout");
   const toastNode = document.getElementById("cart-toast");
+
+  let toastTimer;
 
   function csrfToken() {
     const match = document.cookie.match(/(?:^|; )csrftoken=([^;]*)/);
@@ -162,169 +182,185 @@
     });
   }
 
-  let toastTimer;
-  function showToast(message) {
+  function toast(message) {
     toastNode.textContent = message;
     toastNode.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastNode.classList.remove("show"), 2400);
+    toastTimer = setTimeout(() => toastNode.classList.remove("show"), 2500);
   }
 
-  async function request(url, options = {}) {
-    const headers = {
-      "Accept": "application/json",
-      ...(options.body ? {"Content-Type": "application/json"} : {}),
-      ...(options.method && options.method !== "GET" ? {"X-CSRFToken": csrfToken()} : {})
+  async function apiRequest(url, method, body) {
+    const options = {
+      method,
+      credentials: "same-origin",
+      headers: { "Accept": "application/json" }
     };
 
-    const response = await fetch(url, {
-      credentials: "same-origin",
-      ...options,
-      headers
-    });
+    if (body) {
+      options.headers["Content-Type"] = "application/json";
+      options.headers["X-CSRFToken"] = csrfToken();
+      options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, options);
 
     if (response.status === 401) {
       window.location.href = loginUrl + "?next=" +
         encodeURIComponent(window.location.pathname);
-      throw new Error("Please log in to use your cart.");
+      throw new Error("Please log in to manage your cart.");
     }
 
     const data = await response.json().catch(() => ({}));
+
     if (!response.ok || data.ok === false) {
-      throw new Error(data.error || "Unable to update your cart.");
+      throw new Error(data.error || "The cart could not be updated.");
     }
+
     return data;
   }
 
-  function el(tag, className, text) {
+  function element(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (text !== undefined) node.textContent = text;
     return node;
   }
 
+  function updateHeaderCount(count) {
+    document.querySelectorAll(
+      "[data-cart-count], #cart-count-badge, .cart-count, #cart-count"
+    ).forEach(node => {
+      node.textContent = String(count);
+    });
+
+    document.dispatchEvent(new CustomEvent("vla:cart-updated", {
+      detail: { count }
+    }));
+  }
+
+  function showEmptyCart() {
+    const empty = element("div", "cart-empty");
+    empty.append(
+      element("h2", "", "Your cart is empty"),
+      element("p", "", "Explore our products and add items to your cart.")
+    );
+
+    const link = element("a", "btn btn-primary", "Explore products");
+    link.href = "{% url 'store:product_list' %}";
+    empty.append(link);
+    itemsNode.append(empty);
+  }
+
   function renderCart(data) {
+    const items = Array.isArray(data.items) ? data.items : [];
     itemsNode.replaceChildren();
 
+    const count = Number(data.count || 0);
+    pageCount.textContent = String(count);
     subtotalNode.textContent = money(data.total);
-    countNode.textContent = String(data.count || 0);
-    mobileTotalNode.textContent = money(data.total);
-    mobileBar.hidden = !data.items || data.items.length === 0;
+    mobileTotal.textContent = money(data.total);
+    mobileBar.hidden = items.length === 0;
+    updateHeaderCount(count);
 
-    document.querySelectorAll("[data-cart-count], #cart-count-badge, .cart-count")
-      .forEach(node => { node.textContent = String(data.count || 0); });
-
-    if (!data.items || data.items.length === 0) {
-      const empty = el("div", "cart-empty");
-      empty.append(
-        el("h2", "", "Your cart is empty"),
-        el("p", "", "Browse our seeds, fertilizers and crop protection products.")
-      );
-      const link = el("a", "btn btn-primary", "Explore products");
-      link.href = "{% url 'store:product_list' %}";
-      empty.append(link);
-      itemsNode.append(empty);
-      statusNode.textContent = "";
+    if (!items.length) {
+      showEmptyCart();
+      statusNode.textContent = "Your cart is empty.";
       return;
     }
 
-    data.items.forEach(item => {
-      const row = el("article", "cart-row");
-      const imageUrl = item.image || item.image_url || "";
+    items.forEach(item => {
+      const row = element("article", "cart-row");
 
+      const imageUrl = item.image_url || item.image || "";
       if (imageUrl) {
-        const img = el("img", "cart-row-image");
+        const img = element("img", "cart-row-image");
         img.src = imageUrl;
         img.alt = item.name || "Product";
         img.loading = "lazy";
         img.onerror = function () {
-          const placeholder = el("div", "cart-row-image", "❋");
+          const placeholder = element("div", "cart-image-placeholder", "❋");
           img.replaceWith(placeholder);
         };
         row.append(img);
       } else {
-        row.append(el("div", "cart-row-image", "❋"));
+        row.append(element("div", "cart-image-placeholder", "❋"));
       }
 
-      const details = el("div", "cart-row-details");
+      const details = element("div", "cart-row-details");
       details.append(
-        el("h3", "", item.name),
-        el("p", "", item.brand || ""),
-        el("p", "", money(item.price) + " / " + (item.unit || "unit"))
+        element("h3", "", item.name || "Product"),
+        element("p", "", item.brand || ""),
+        element("p", "", money(item.price) + " / " + (item.unit || "unit"))
       );
 
-      const controls = el("div", "cart-row-controls");
-      const label = el("label", "", "Qty ");
-      const qty = el("input", "cart-qty");
-      qty.type = "number";
-      qty.min = "1";
-      qty.max = String(item.stock_quantity || 999999);
-      qty.value = String(item.quantity);
-      qty.setAttribute("aria-label", "Quantity for " + item.name);
-      label.append(qty);
+      const controls = element("div", "cart-row-controls");
+      const label = element("label", "", "Qty ");
+      const quantity = element("input", "cart-qty");
+      quantity.type = "number";
+      quantity.min = "1";
+      quantity.max = String(item.stock_quantity || 999999);
+      quantity.value = String(item.quantity || 1);
+      quantity.setAttribute("aria-label", "Quantity for " + item.name);
+      label.append(quantity);
 
-      const updateButton = el("button", "cart-action", "Update");
+      const updateButton = element("button", "cart-action", "Update");
       updateButton.type = "button";
-      updateButton.addEventListener("click", async () => {
+      updateButton.addEventListener("click", async function () {
         updateButton.disabled = true;
         try {
-          const result = await request(updateUrl, {
-            method: "POST",
-            body: JSON.stringify({
-              item_id: item.id,
-              product_id: item.product_id,
-              action: "update",
-              quantity: qty.value
-            })
+          const result = await apiRequest(updateApi, "POST", {
+            action: "update",
+            item_id: item.item_id || item.id,
+            product_id: item.product_id,
+            quantity: quantity.value
           });
           renderCart(result);
-          showToast("Cart updated successfully");
-          document.dispatchEvent(new CustomEvent("vla:cart-updated", {
-            detail: { count: result.count }
-          }));
+          toast("Cart updated");
         } catch (error) {
-          showToast(error.message);
+          toast(error.message);
         } finally {
           updateButton.disabled = false;
         }
       });
 
-      const removeButton = el("button", "cart-action", "Remove");
+      const removeButton = element("button", "cart-action cart-remove", "×");
       removeButton.type = "button";
-      removeButton.addEventListener("click", async () => {
+      removeButton.title = "Remove " + (item.name || "item");
+      removeButton.setAttribute("aria-label", "Remove " + (item.name || "item"));
+
+      removeButton.addEventListener("click", async function () {
         removeButton.disabled = true;
+        removeButton.textContent = "…";
+
         try {
-          const result = await request(updateUrl, {
-            method: "POST",
-            body: JSON.stringify({
-              item_id: item.id,
-              product_id: item.product_id,
-              action: "remove"
-            })
+          // Use the primary cart API's remove action.
+          const result = await apiRequest(cartApi, "POST", {
+            action: "remove",
+            product_id: item.product_id,
+            quantity: 1
           });
+
           renderCart(result);
-          showToast("Item removed from cart");
-          document.dispatchEvent(new CustomEvent("vla:cart-updated", {
-            detail: { count: result.count }
-          }));
+          toast("Item removed from your cart");
         } catch (error) {
-          showToast(error.message);
           removeButton.disabled = false;
+          removeButton.textContent = "×";
+          toast(error.message);
         }
       });
 
       controls.append(label, updateButton, removeButton);
       details.append(controls);
-      row.append(details, el("strong", "cart-row-price", money(item.line_total)));
+
+      row.append(
+        details,
+        element("strong", "cart-row-price", money(item.line_total))
+      );
       itemsNode.append(row);
     });
 
-    statusNode.textContent = data.count +
-      (data.count === 1 ? " item in your cart" : " items in your cart");
-
-    document.dispatchEvent(new CustomEvent("vla:cart-updated", {
-      detail: { count: data.count }
-    }));
+    statusNode.textContent = count +
+      (count === 1 ? " item in your cart" : " items in your cart");
   }
 
   async function loadCart() {
@@ -332,12 +368,10 @@
     statusNode.classList.remove("error");
 
     try {
-      renderCart(await request(apiUrl));
+      renderCart(await apiRequest(cartApi, "GET"));
     } catch (error) {
-      if (error.message !== "Please log in to use your cart.") {
-        statusNode.textContent = error.message;
-        statusNode.classList.add("error");
-      }
+      statusNode.textContent = error.message;
+      statusNode.classList.add("error");
     }
   }
 
