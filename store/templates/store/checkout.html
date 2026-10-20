@@ -13,38 +13,184 @@
 </section>
 
 <section class="wrap checkout-layout">
-    <form id="checkout-form" class="checkout-form">
+    <form method="post"
+          action="{% url 'store:checkout' %}"
+          class="checkout-form"
+          id="whatsapp-order-form">
         {% csrf_token %}
+
         <h2>Customer details</h2>
 
+        {% if messages %}
+            {% for message in messages %}
+                <p role="alert" class="message {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
         <label for="customer-name">Full name *</label>
-        <input id="customer-name" name="name" required maxlength="100" autocomplete="name">
+        <input
+            id="customer-name"
+            name="customer_name"
+            type="text"
+            value="{{ customer_name }}"
+            required
+            maxlength="100"
+            autocomplete="name">
 
         <label for="customer-phone">Phone number *</label>
-        <input id="customer-phone" name="phone" type="tel" required maxlength="30" autocomplete="tel">
+        <input
+            id="customer-phone"
+            name="phone_number"
+            type="tel"
+            value="{{ phone_number }}"
+            required
+            maxlength="30"
+            autocomplete="tel">
 
         <label for="customer-address">Delivery address / village *</label>
-        <textarea id="customer-address" name="address" required maxlength="500" rows="4" autocomplete="street-address"></textarea>
+        <textarea
+            id="customer-address"
+            name="address"
+            required
+            maxlength="500"
+            rows="4"
+            autocomplete="street-address"
+            placeholder="Enter your village, town and delivery address"></textarea>
 
         <label for="customer-notes">Additional notes (optional)</label>
-        <textarea id="customer-notes" name="notes" rows="2" maxlength="300"></textarea>
+        <textarea
+            id="customer-notes"
+            name="notes"
+            rows="3"
+            maxlength="300"
+            placeholder="Any extra information about your order"></textarea>
 
-        <button id="checkout-submit" class="btn btn-primary btn-large full-width" type="submit">
+        <button
+            id="whatsapp-submit"
+            class="btn btn-primary btn-large full-width"
+            type="submit">
             Send order to WhatsApp ↗
         </button>
 
-        <p id="checkout-error" class="error-message" role="alert"></p>
-        <p class="fine-print">WhatsApp will open with your order details. Review the message and press Send there to contact the shop.</p>
+        <p class="fine-print">
+            WhatsApp will open with your order details. Review the message and press
+            Send in WhatsApp to contact the shop.
+        </p>
     </form>
 
     <aside class="cart-summary">
         <h2>Order summary</h2>
-        <div id="checkout-summary"></div>
+
+        {% for item in items %}
+            <div class="summary-line">
+                <span>{{ item.name }} × {{ item.quantity }}</span>
+                <strong>₹{{ item.line_total }}</strong>
+            </div>
+        {% empty %}
+            <p>Your cart is empty.</p>
+        {% endfor %}
+
         <div class="summary-line total-line">
             <span>Estimated subtotal</span>
-            <strong id="checkout-total">₹0.00</strong>
+            <strong>₹{{ cart_total }}</strong>
         </div>
-        <p>Delivery fee and final price are confirmed by the owner.</p>
+
+        <p>Delivery fee and final price are confirmed by the shop owner.</p>
+        <p class="fine-print">No online payment is collected on this website.</p>
+
+        <a class="text-link" href="{% url 'store:cart' %}">← Back to cart</a>
     </aside>
 </section>
+
+<style>
+.checkout-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(270px, .8fr);
+    gap: 28px;
+    align-items: start;
+    padding-top: 24px;
+    padding-bottom: 80px;
+}
+.checkout-form,
+.cart-summary {
+    min-width: 0;
+    padding: 26px;
+    border: 1px solid #e5d2b5;
+    border-radius: 14px;
+    background: #fbf0df;
+}
+.checkout-form h2,
+.cart-summary h2 {
+    margin-top: 0;
+    color: #173f2b;
+}
+.checkout-form label {
+    display: block;
+    margin: 16px 0 7px;
+    font-weight: 600;
+}
+.checkout-form input,
+.checkout-form textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #d9c4a4;
+    border-radius: 8px;
+    background: #fff8ed;
+    color: #173f2b;
+    font: inherit;
+}
+.checkout-form textarea {
+    resize: vertical;
+}
+.checkout-form input:focus,
+.checkout-form textarea:focus {
+    outline: 2px solid #245535;
+    outline-offset: 1px;
+}
+.checkout-form button {
+    margin-top: 18px;
+    cursor: pointer;
+}
+.full-width {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 0;
+    border-bottom: 1px solid #e5d2b5;
+}
+.summary-line strong {
+    color: #173f2b;
+    white-space: nowrap;
+}
+.total-line {
+    margin-top: 8px;
+    font-size: 1.05rem;
+}
+.cart-summary > p {
+    color: #68766c;
+    line-height: 1.6;
+}
+.fine-print {
+    margin-top: 18px;
+    color: #68766c;
+    font-size: .86rem;
+    line-height: 1.6;
+}
+@media (max-width: 760px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .checkout-form,
+    .cart-summary {
+        padding: 18px;
+    }
+}
+</style>
 {% endblock %}
