@@ -1,0 +1,59 @@
+
+{% extends "store/base.html" %}
+
+{% block title %}Customer Login | Vijaya Lakshmi Agro Agencies{% endblock %}
+
+{% block content %}
+<section class="page-banner">
+    <div class="wrap">
+        <span class="eyebrow">WELCOME BACK</span>
+        <h1>Customer login</h1>
+        <p>Log in with your registered mobile number and password.</p>
+    </div>
+</section>
+
+<section class="wrap checkout-layout">
+    <form method="post" class="checkout-form">
+        {% csrf_token %}
+
+        <h2>Log in to your account</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <p role="alert">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <label for="phone">Mobile number *</label>
+        <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            maxlength="15"
+            autocomplete="tel"
+            placeholder="Enter your registered mobile number"
+        >
+
+        <label for="password">Password *</label>
+        <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+        >
+
+        <button
+            class="btn btn-primary btn-large full-width"
+            type="submit"
+        >
+            Log in
+        </button>
+
+        <p>Don't have an account?
+            <a href="{% url 'store:register' %}">Create an account</a>
+        </p>
+    </form>
+</section>
+{% endblock %}
