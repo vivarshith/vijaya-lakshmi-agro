@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -21,9 +21,7 @@ from .models import Category, Product, CustomerProfile, Cart, CartItem
 WHATSAPP_NUMBER = "918297243999"
 
 
-# ==================================================
-# HELPERS
-# ==================================================
+# -------------------- HELPERS --------------------
 
 def _get_cart(user):
     cart, _ = Cart.objects.get_or_create(user=user)
@@ -35,9 +33,7 @@ def _cart_summary(cart):
     total = Decimal("0.00")
     count = 0
 
-    items = cart.items.select_related("product", "product__category").all()
-
-    for item in items:
+    for item in cart.items.select_related("product", "product__category"):
         product = item.product
         line_total = product.price * item.quantity
         total += line_total
@@ -45,6 +41,7 @@ def _cart_summary(cart):
 
         result.append({
             "id": item.id,
+            "item_id": item.id,
             "product_id": product.id,
             "name": product.name,
             "brand": product.brand,
@@ -82,20 +79,17 @@ def _api_login_required(request):
     return None
 
 
-# ==================================================
-# HOMEPAGE AND PRODUCTS
-# ==================================================
+# -------------------- HOMEPAGE --------------------
 
 def home(request):
     categories = Category.objects.all()
 
     featured_products = Product.objects.filter(
-        is_active=True,
-        featured=True,
+        is_active=True, featured=True
     ).select_related("category")[:12]
 
     products = Product.objects.filter(
-        is_active=True,
+        is_active=True
     ).select_related("category")[:12]
 
     return render(request, "store/home.html", {
@@ -105,9 +99,11 @@ def home(request):
     })
 
 
+# -------------------- PRODUCTS --------------------
+
 def product_list(request):
     products = Product.objects.filter(
-        is_active=True,
+        is_active=True
     ).select_related("category")
 
     query = request.GET.get("q", "").strip()
@@ -159,9 +155,7 @@ def product_detail(request, slug):
     })
 
 
-# ==================================================
-# CART PAGE AND API
-# ==================================================
+# -------------------- CART PAGE --------------------
 
 def cart_view(request):
     if not request.user.is_authenticated:
@@ -179,6 +173,8 @@ def cart_view(request):
     })
 
 
+# -------------------- CART API --------------------
+
 @require_http_methods(["GET", "POST"])
 def cart_api(request):
     auth_error = _api_login_required(request)
@@ -188,16 +184,12 @@ def cart_api(request):
     cart = _get_cart(request.user)
 
     if request.method == "GET":
-        return JsonResponse({
-            "ok": True,
-            **_cart_summary(cart),
-        })
+        return JsonResponse({"ok": True, **_cart_summary(cart)})
 
     data = _json_body(request)
     if data is None:
         return JsonResponse({
-            "ok": False,
-            "error": "Invalid JSON.",
+            "ok": False, "error": "Invalid JSON."
         }, status=400)
 
     try:
@@ -205,28 +197,23 @@ def cart_api(request):
         quantity = int(data.get("quantity", 1))
     except (TypeError, ValueError):
         return JsonResponse({
-            "ok": False,
-            "error": "Invalid product or quantity.",
+            "ok": False, "error": "Invalid product or quantity."
         }, status=400)
 
     action = data.get("action", "add")
 
     if action not in ("add", "update", "remove"):
         return JsonResponse({
-            "ok": False,
-            "error": "Unknown cart action.",
+            "ok": False, "error": "Unknown cart action."
         }, status=400)
 
     if quantity < 1:
         return JsonResponse({
-            "ok": False,
-            "error": "Quantity must be at least 1.",
+            "ok": False, "error": "Quantity must be at least 1."
         }, status=400)
 
     product = get_object_or_404(
-        Product,
-        pk=product_id,
-        is_active=True,
+        Product, pk=product_id, is_active=True
     )
 
     if action == "remove":
@@ -247,13 +234,9 @@ def cart_api(request):
         if new_quantity > product.stock_quantity:
             if created:
                 item.delete()
-
             return JsonResponse({
                 "ok": False,
-                "error": (
-                    f"Only {product.stock_quantity} unit(s) "
-                    "are available."
-                ),
+                "error": f"Only {product.stock_quantity} unit(s) are available.",
             }, status=400)
 
         if not created:
@@ -263,10 +246,7 @@ def cart_api(request):
     cart.updated_at = timezone.now()
     cart.save(update_fields=["updated_at"])
 
-    return JsonResponse({
-        "ok": True,
-        **_cart_summary(cart),
-    })
+    return JsonResponse({"ok": True, **_cart_summary(cart)})
 
 
 @require_POST
@@ -278,27 +258,35 @@ def cart_api_update(request):
     data = _json_body(request)
     if data is None:
         return JsonResponse({
-            "ok": False,
-            "error": "Invalid JSON.",
-        }, status=400)
-
-    try:
-        item_id = int(data.get("item_id"))
-    except (TypeError, ValueError):
-        return JsonResponse({
-            "ok": False,
-            "error": "Invalid cart item.",
+            "ok": False, "error": "Invalid JSON."
         }, status=400)
 
     cart = _get_cart(request.user)
-
-    item = get_object_or_404(
-        CartItem.objects.select_related("product"),
-        pk=item_id,
-        cart=cart,
-    )
-
     action = data.get("action", "update")
+    item = None
+
+    # Accept the cart row ID, or fall back to product ID for
+    # compatibility with existing frontend JavaScript.
+    try:
+        if data.get("item_id") not in (None, ""):
+            item = cart.items.select_related("product").filter(
+                pk=int(data["item_id"])
+            ).first()
+
+        if item is None and data.get("product_id") not in (None, ""):
+            item = cart.items.select_related("product").filter(
+                product_id=int(data["product_id"])
+            ).first()
+    except (TypeError, ValueError):
+        return JsonResponse({
+            "ok": False, "error": "Invalid cart item."
+        }, status=400)
+
+    if item is None:
+        return JsonResponse({
+            "ok": False,
+            "error": "This item is not in your cart. Refresh and try again.",
+        }, status=404)
 
     if action == "remove":
         item.delete()
@@ -308,23 +296,18 @@ def cart_api_update(request):
             quantity = int(data.get("quantity"))
         except (TypeError, ValueError):
             return JsonResponse({
-                "ok": False,
-                "error": "Invalid quantity.",
+                "ok": False, "error": "Enter a valid quantity."
             }, status=400)
 
         if quantity < 1:
             return JsonResponse({
-                "ok": False,
-                "error": "Quantity must be at least 1.",
+                "ok": False, "error": "Quantity must be at least 1."
             }, status=400)
 
         if quantity > item.product.stock_quantity:
             return JsonResponse({
                 "ok": False,
-                "error": (
-                    f"Only {item.product.stock_quantity} unit(s) "
-                    "are available."
-                ),
+                "error": f"Only {item.product.stock_quantity} unit(s) are available.",
             }, status=400)
 
         item.quantity = quantity
@@ -332,22 +315,16 @@ def cart_api_update(request):
 
     else:
         return JsonResponse({
-            "ok": False,
-            "error": "Unknown cart action.",
+            "ok": False, "error": "Unknown cart action."
         }, status=400)
 
     cart.updated_at = timezone.now()
     cart.save(update_fields=["updated_at"])
 
-    return JsonResponse({
-        "ok": True,
-        **_cart_summary(cart),
-    })
+    return JsonResponse({"ok": True, **_cart_summary(cart)})
 
 
-# ==================================================
-# CUSTOMER REGISTRATION
-# ==================================================
+# -------------------- REGISTRATION --------------------
 
 @require_http_methods(["GET", "POST"])
 def register_view(request):
@@ -355,7 +332,6 @@ def register_view(request):
         return redirect("store:home")
 
     if request.method == "POST":
-        # Support alternative HTML field names.
         name = (
             request.POST.get("name", "").strip()
             or request.POST.get("full_name", "").strip()
@@ -382,13 +358,13 @@ def register_view(request):
         if not name or not phone or not password:
             messages.error(
                 request,
-                "Please fill in your name, mobile number and password.",
+                "Please fill in your name, mobile number and password."
             )
 
         elif not phone.isdigit() or not 10 <= len(phone) <= 15:
             messages.error(
                 request,
-                "Enter a valid mobile number using digits only.",
+                "Enter a valid mobile number using digits only."
             )
 
         elif password != confirm_password:
@@ -397,21 +373,16 @@ def register_view(request):
         elif len(password) < 8:
             messages.error(
                 request,
-                "Password must contain at least 8 characters.",
+                "Password must contain at least 8 characters."
             )
 
-        elif CustomerProfile.objects.filter(
-            phone_number=phone
-        ).exists():
+        elif (
+            CustomerProfile.objects.filter(phone_number=phone).exists()
+            or User.objects.filter(username=phone).exists()
+        ):
             messages.error(
                 request,
-                "This mobile number is already registered. Please log in.",
-            )
-
-        elif User.objects.filter(username=phone).exists():
-            messages.error(
-                request,
-                "An account already uses this mobile number. Please log in.",
+                "This mobile number is already registered. Please log in."
             )
 
         else:
@@ -440,28 +411,26 @@ def register_view(request):
                     login(request, user)
                     messages.success(
                         request,
-                        "Your account has been created successfully!",
+                        "Your account has been created successfully!"
                     )
                     return redirect("store:home")
 
                 messages.success(
                     request,
-                    "Account created. Please log in.",
+                    "Account created. Please log in."
                 )
                 return redirect("store:login")
 
             except IntegrityError:
                 messages.error(
                     request,
-                    "This mobile number is already registered. Please log in.",
+                    "This mobile number is already registered. Please log in."
                 )
 
     return render(request, "store/register.html")
 
 
-# ==================================================
-# CUSTOMER LOGIN
-# ==================================================
+# -------------------- LOGIN --------------------
 
 @require_http_methods(["GET", "POST"])
 def login_view(request):
@@ -474,20 +443,14 @@ def login_view(request):
             or request.POST.get("phone", "").strip()
             or request.POST.get("mobile_number", "").strip()
         )
-
         password = request.POST.get("password", "")
-
         user = None
 
         if phone and password:
-            # First, try the phone number as the username.
             user = authenticate(
-                request,
-                username=phone,
-                password=password,
+                request, username=phone, password=password
             )
 
-            # Then look up accounts by their saved phone number.
             if user is None:
                 try:
                     profile = CustomerProfile.objects.select_related(
@@ -499,7 +462,6 @@ def login_view(request):
                         username=profile.user.username,
                         password=password,
                     )
-
                 except CustomerProfile.DoesNotExist:
                     user = None
 
@@ -522,15 +484,13 @@ def login_view(request):
 
         messages.error(
             request,
-            "Incorrect phone number or password. Check your registered mobile number and password.",
+            "Incorrect phone number or password. Check your registered mobile number and password."
         )
 
     return render(request, "store/login.html")
 
 
-# ==================================================
-# LOGOUT
-# ==================================================
+# -------------------- LOGOUT --------------------
 
 @login_required
 @require_POST
@@ -539,9 +499,7 @@ def logout_view(request):
     return redirect("store:home")
 
 
-# ==================================================
-# WHATSAPP CHECKOUT — NO ONLINE PAYMENT
-# ==================================================
+# -------------------- WHATSAPP CHECKOUT --------------------
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -628,9 +586,7 @@ def checkout(request):
     })
 
 
-# ==================================================
-# HEALTH CHECK
-# ==================================================
+# -------------------- HEALTH CHECK --------------------
 
 @require_GET
 def health(request):
