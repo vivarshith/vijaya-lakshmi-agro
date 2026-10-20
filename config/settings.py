@@ -10,14 +10,16 @@ SECRET_KEY = os.environ.get(
     "SECRET_KEY",
     "dev-only-change-this-secret-key",
 )
+
 DEBUG = os.environ.get("DEBUG", "True").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.environ.get(
-        "ALLOWED_HOSTS", "127.0.0.1,localhost"
+    host.strip()
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        "127.0.0.1,localhost",
     ).split(",")
-    if h.strip()
+    if host.strip()
 ]
 
 INSTALLED_APPS = [
@@ -65,6 +67,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Database
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
@@ -83,6 +86,7 @@ else:
         }
     }
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": (
@@ -110,6 +114,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Customer login and logout redirects
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# Languages
 LANGUAGE_CODE = "en"
 
 LANGUAGES = [
@@ -122,15 +132,15 @@ TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
+# Static files
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Uploaded media
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Django 5 storage configuration:
-# Cloudinary stores uploaded media when CLOUDINARY_URL is set.
-# WhiteNoise serves static files in either configuration.
+# Storage configuration
 if os.environ.get("CLOUDINARY_URL"):
     STORAGES = {
         "default": {
@@ -160,13 +170,21 @@ else:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# CSRF protection
 CSRF_TRUSTED_ORIGINS = [
-    x.strip()
-    for x in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-    if x.strip()
+    origin.strip()
+    for origin in os.environ.get(
+        "CSRF_TRUSTED_ORIGINS",
+        "",
+    ).split(",")
+    if origin.strip()
 ]
 
+# Production security
 if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https",
+    )
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
